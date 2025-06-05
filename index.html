@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meine ToDos</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url('file:///C:/Users/cr/Pictures/istockphoto-1487283582-612x612.jpg');
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      padding: 2rem;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #222;
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+    }
+    .todo {
+      max-width: 600px;
+      margin: 1rem auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    input, button {
+      padding: 0.6rem;
+      margin: 0.4rem 0;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #7c5cbf;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #6841b0;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem;
+      border-bottom: 1px solid #ddd;
+      background-color: #fdfdfd;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+    li.done span {
+      text-decoration: line-through;
+      color: grey;
+    }
+    small {
+      color: #777;
+    }
+    .actions {
+      display: flex;
+      gap: 0.25rem;
+    }
+    .actions button {
+      padding: 0.25rem 0.5rem;
+      background-color: #ccc;
+      border: none;
+      color: #333;
+    }
+    .actions button:hover {
+      background-color: #bbb;
+    }
+    .reminder {
+      background: #fff8d1;
+      padding: 0.75rem;
+      margin: 1rem auto;
+      max-width: 600px;
+      border: 1px solid #e0c96d;
+      border-radius: 10px;
+      color: #6b5600;
+      display: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐾 Tayfuns ToDos</h1>
+  <div class="todo">
+    <input type="text" id="taskInput" placeholder="Neue Aufgabe..." />
+    <input type="datetime-local" id="deadlineInput" />
+    <button onclick="addTask()">Hinzufügen</button>
+    <ul id="todoList"></ul>
+  </div>
+
+  <div class="reminder" id="reminderBox"></div>
+
+  <script>
+    const todoList = document.getElementById("todoList");
+    const reminderBox = document.getElementById("reminderBox");
+    let todos = JSON.parse(localStorage.getItem("todos") || "[]");
+
+    function saveTodos() {
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }
+
+    function renderTodos() {
+      todoList.innerHTML = "";
+      todos.forEach((todo, index) => {
+        const li = document.createElement("li");
+        li.className = todo.done ? "done" : "";
+
+        const content = document.createElement("span");
+        content.textContent = todo.text;
+
+        const deadline = document.createElement("small");
+        deadline.textContent = todo.deadline ? `Fällig: ${new Date(todo.deadline).toLocaleString()}` : "";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = todo.done;
+        checkbox.addEventListener("change", () => {
+          todos[index].done = !todos[index].done;
+          saveTodos();
+          renderTodos();
+        });
+
+        const editButton = document.createElement("button");
+        editButton.textContent = "✏️";
+        editButton.title = "Bearbeiten";
+        editButton.onclick = () => editTask(index);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "🗑️";
+        deleteButton.title = "Löschen";
+        deleteButton.onclick = () => deleteTask(index);
+
+        const wrapper = document.createElement("div");
+        wrapper.style.display = "flex";
+        wrapper.style.flexDirection = "column";
+        wrapper.appendChild(content);
+        wrapper.appendChild(deadline);
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        actions.appendChild(checkbox);
+        actions.appendChild(editButton);
+        actions.appendChild(deleteButton);
+
+        li.appendChild(wrapper);
+        li.appendChild(actions);
+        todoList.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const text = document.getElementById("taskInput").value.trim();
+      const deadline = document.getElementById("deadlineInput").value;
+      if (text) {
+        todos.push({ text, done: false, deadline, reminded: false });
+        saveTodos();
+        renderTodos();
+        document.getElementById("taskInput").value = "";
+        document.getElementById("deadlineInput").value = "";
+      }
+    }
+
+    function deleteTask(index) {
+      todos.splice(index, 1);
+      saveTodos();
+      renderTodos();
+    }
+
+    function editTask(index) {
+      const newText = prompt("Bearbeite deine Aufgabe:", todos[index].text);
+      if (newText !== null) {
+        todos[index].text = newText.trim();
+        saveTodos();
+        renderTodos();
+      }
+    }
+
+    function checkReminders() {
+      const now = new Date();
+      let messages = [];
+      todos.forEach((todo, i) => {
+        if (!todo.done && todo.deadline) {
+          const due = new Date(todo.deadline);
+          const diff = due - now;
+          if (diff < 60 * 60 * 1000 && diff > 0) {
+            messages.push(`⏰ Erinnerung: "${todo.text}" ist bald fällig (${due.toLocaleTimeString()})`);
+          }
+        }
+      });
+      if (messages.length > 0) {
+        reminderBox.innerHTML = messages.join("<br>");
+        reminderBox.style.display = "block";
+      } else {
+        reminderBox.style.display = "none";
+      }
+    }
+
+    renderTodos();
+    checkReminders();
+    setInterval(checkReminders, 5 * 60 * 1000);
+  </script>
+</body>
+</html>

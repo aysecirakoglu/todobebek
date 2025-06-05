@@ -143,7 +143,7 @@
   {
     text: "Wasser trinken",
     done: false,
-    deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    deadline: null,
     reminded: false,
     repeat: "daily"
   }
@@ -180,11 +180,7 @@
         checkbox.checked = todo.done;
         checkbox.addEventListener("change", () => {
           if (todo.repeat === "daily" && checkbox.checked) {
-            const nextDay = new Date(todo.deadline);
-            nextDay.setDate(nextDay.getDate() + 1);
-            todos[index].deadline = nextDay.toISOString();
-            todos[index].done = false;
-          } else {
+  
             todos[index].done = checkbox.checked;
           }
           saveTodos();

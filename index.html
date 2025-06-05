@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tayfuns ToDos</title>
+  <title>Tayfuns ToDos & Snake-Spiel (mit Touch-Steuerung)</title>
   <style>
+    /* --------------------------
+       Grund-Styles (unverändert)
+       -------------------------- */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-image: url('https://static.vecteezy.com/ti/gratis-vektor/p1/3423841-susse-katze-cartoon-gekritzel-nahtloses-muster-hintergrund-hintergrundbild-vektor.jpg');
@@ -15,6 +18,7 @@
       padding: 1rem;
       margin: 0;
       color: #333;
+      overflow-x: hidden; /* Verhindert horizontales Scrollen, wenn Sidebar offen ist */
     }
     h1 {
       text-align: center;
@@ -22,7 +26,7 @@
       font-size: 2rem;
       margin: 0.5rem;
     }
-    .todo {
+    .todo, .calendar-container, .snake-container {
       width: 80%;
       max-width: 600px;
       margin: 1rem auto;
@@ -30,6 +34,8 @@
       padding: 1rem;
       border-radius: 16px;
       box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
     }
     input, select, button {
       padding: 0.6rem;
@@ -47,7 +53,7 @@
       cursor: pointer;
     }
     button:hover {
-      background-color: #076412;
+      background-color: #05530f;
     }
     ul {
       list-style: none;
@@ -105,25 +111,251 @@
       color: #6b5600;
       display: none;
       font-weight: bold;
+      position: relative;
+      z-index: 1;
     }
     @media (max-width: 480px) {
       h1 {
         font-size: 1.5rem;
       }
-      .todo {
+      .todo, .calendar-container, .snake-container {
         padding: 0.8rem;
       }
       input, button {
         font-size: 0.95rem;
       }
     }
+
+    /* --------------------------
+       Neue Styles: Hamburger & Sidebar
+       -------------------------- */
+    /* Hamburger-Button (oben links) */
+    .hamburger {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      width: 35px;
+      height: 30px;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .hamburger div {
+      width: 100%;
+      height: 4px;
+      background-color: #333;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    /* Linien werden animiert, wenn aktiv */
+    .hamburger.active div:nth-child(1) {
+      transform: rotate(45deg) translate(6px, 6px);
+    }
+    .hamburger.active div:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.active div:nth-child(3) {
+      transform: rotate(-45deg) translate(6px, -6px);
+    }
+
+    /* Overlay für Hintergrund abdunkeln */
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: rgba(0,0,0,0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+      z-index: 9;
+    }
+    #overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Sidebar-Menü (versteckt, rutscht rein) */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px; /* Außerhalb des Bildschirms starten */
+      width: 260px;
+      height: 100%;
+      background: #ffffffcc;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+      transition: left 0.3s ease;
+      z-index: 10;
+      padding: 1rem 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #sidebar.show {
+      left: 0; /* Wenn aktiv, reinziehen */
+    }
+    /* Menü-Einträge */
+    #sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+    }
+    #sidebar ul li {
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid #ddd;
+      font-size: 1rem;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    #sidebar ul li:hover {
+      background: #f0f0f0;
+    }
+    /* „Schließen“-Knopf rechts oben in der Sidebar */
+    #sidebar .close-btn {
+      align-self: flex-end;
+      margin: 0.5rem 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #333;
+    }
+
+    /* Footer-Bereich in Sidebar (z. B. Version, Kontakt) */
+    #sidebar .sidebar-footer {
+      padding: 1rem;
+      font-size: 0.85rem;
+      color: #666;
+      text-align: center;
+      border-top: 1px solid #ddd;
+    }
+
+    /* --------------------------
+       Kalender-Styles
+       -------------------------- */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .calendar-header button {
+      width: auto;
+      padding: 0.4rem 0.8rem;
+    }
+    .calendar-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    table.calendar {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table.calendar th,
+    table.calendar td {
+      border: 1px solid #ddd;
+      width: 14.28%;
+      vertical-align: top;
+      padding: 0.3rem;
+      height: 80px;
+    }
+    table.calendar th {
+      background-color: #f0f0f0;
+      text-align: center;
+      font-weight: normal;
+    }
+    table.calendar td span.date-number {
+      font-weight: bold;
+    }
+    table.calendar td ul {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 0.3rem;
+      max-height: 60px;
+      overflow-y: auto;
+    }
+    table.calendar td li {
+      font-size: 0.85rem;
+      margin-bottom: 0.2rem;
+      padding: 0.2rem;
+      background-color: #e0f7e0;
+      border-radius: 4px;
+    }
+    .today {
+      background-color: #fff3cd;
+    }
+
+    /* --------------------------
+       Snake-Styles
+       -------------------------- */
+    .snake-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .snake-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    canvas#snakeCanvas {
+      background-color: #111;
+      display: block;
+      margin: 0 auto;
+      border: 2px solid #333;
+      border-radius: 8px;
+      touch-action: none; /* verhindert Scrollen bei Swipes */
+    }
+    .snake-score {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <div style="background-color: rgba(255, 255, 255, 0.85); padding: 0.5rem 1rem; border-radius: 12px; max-width: 90%; margin: 1rem auto; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+
+  <!-- Hamburger-Button -->
+  <div class="hamburger" id="hamburgerBtn">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+
+  <!-- Overlay (dunkler Hintergrund) -->
+  <div id="overlay"></div>
+
+  <!-- Sidebar-Menü -->
+  <nav id="sidebar">
+    <span class="close-btn" id="closeSidebar">&times;</span>
+    <ul>
+      <li id="menuDashboard">🏠 Dashboard / Übersicht</li>
+      <li id="menuCalendar">📅 Kalender-Ansicht</li>
+      <li id="menuSnake">🐍 Snake-Spiel</li>
+      <li id="menuCategories">🗂️ Kategorien / Projekte</li>
+      <li id="menuPriorities">⭐ Prioritäten</li>
+      <li id="menuStatistics">📊 Statistiken / Fortschritt</li>
+      <li id="menuReminders">🔔 Erinnerungen</li>
+      <li id="menuSettings">⚙️ Einstellungen</li>
+      <li id="menuExport">💾 Export / Import</li>
+      <li id="menuAbout">ℹ️ Über / Hilfe</li>
+    </ul>
+    <div class="sidebar-footer">
+      Version 1.0<br>
+      © 2025 Tayfun
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <div style="background-color: rgba(255, 255, 255, 0.85); padding: 0.5rem 1rem; border-radius: 12px; max-width: 90%; margin: 1rem auto; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; z-index: 1;">
     <h1>🐾 Tayfuns ToDos</h1>
   </div>
-  <div class="todo">
+
+  <!-- ToDo-Liste -->
+  <div class="todo" id="todoContainer">
     <input type="text" id="taskInput" placeholder="Neue Aufgabe..." />
     <input type="datetime-local" id="deadlineInput" placeholder="Deadline" aria-label="Deadline">
     <select id="repeatInput">
@@ -134,149 +366,563 @@
     <ul id="todoList"></ul>
   </div>
 
+  <!-- Erinnerungskasten -->
   <div class="reminder" id="reminderBox"></div>
 
-<script>
-  const todoList = document.getElementById("todoList");
-  const reminderBox = document.getElementById("reminderBox");
+  <!-- Kalender­ansicht (initial versteckt) -->
+  <div class="calendar-container" id="calendarContainer" style="display: none;">
+    <div class="calendar-header">
+      <button id="prevMonth">&lt; Monat zurück</button>
+      <span class="calendar-title" id="calendarTitle"></span>
+      <button id="nextMonth">Monat vor &gt;</button>
+    </div>
+    <div id="calendarGrid"></div>
+  </div>
 
-  // Robust initialisieren
-  let todos;
-  try {
-    todos = JSON.parse(localStorage.getItem("todos"));
-    if (!Array.isArray(todos) || todos.length === 0) {
-      throw new Error("Keine gültigen Aufgaben vorhanden.");
+  <!-- Snake-Spiel Container (initial versteckt) -->
+  <div class="snake-container" id="snakeContainer" style="display: none;">
+    <div class="snake-header">
+      <button onclick="closeSnake()">⏪ Zurück</button>
+      <span class="snake-title">🐍 Snake-Spiel</span>
+      <button onclick="startNewGame()">🔄 Neu starten</button>
+    </div>
+    <canvas id="snakeCanvas" width="300" height="300"></canvas>
+    <div class="snake-score" id="snakeScore">Punkte: 0</div>
+  </div>
+
+  <script>
+    /* -----------------------------------
+       Hamburger-Logik: öffnen / schließen
+       ----------------------------------- */
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    const closeSidebar = document.getElementById("closeSidebar");
+
+    function toggleSidebar() {
+      hamburgerBtn.classList.toggle("active");
+      sidebar.classList.toggle("show");
+      overlay.classList.toggle("show");
     }
-  } catch (e) {
-    todos = [{
-      text: "Mich glücklich schätzen Ayse als Partnerin zu haben ❤️🐱",
-      done: false,
-      deadline: null,
-      reminded: false,
-      repeat: "daily"
-    }];
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }
 
-  function saveTodos() {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }
+    // Klick auf Hamburger-Button öffnet oder schließt Sidebar
+    hamburgerBtn.addEventListener("click", toggleSidebar);
+    // Klick auf Overlay oder „×“ schließt Sidebar
+    overlay.addEventListener("click", toggleSidebar);
+    closeSidebar.addEventListener("click", toggleSidebar);
 
-  function renderTodos() {
-    todoList.innerHTML = "";
-    const now = new Date();
-    todos.forEach((todo, index) => {
-      const li = document.createElement("li");
-      li.className = todo.done ? "done" : "";
+    /* -----------------------------------
+       ToDo-Logik (wie zuvor angepasst)
+       ----------------------------------- */
+    const todoList = document.getElementById("todoList");
+    const reminderBox = document.getElementById("reminderBox");
+    const todoContainer = document.getElementById("todoContainer");
+    const calendarContainer = document.getElementById("calendarContainer");
+    const snakeContainer = document.getElementById("snakeContainer");
 
-      const content = document.createElement("span");
-      content.textContent = todo.text + (todo.repeat === "daily" ? " (Täglich)" : "");
+    let todos;
+    try {
+      todos = JSON.parse(localStorage.getItem("todos"));
+      if (!Array.isArray(todos) || todos.length === 0) {
+        throw new Error("Keine gültigen Aufgaben vorhanden.");
+      }
+    } catch (e) {
+      todos = [{
+        text: "Mich glücklich schätzen Ayse als meine zweite Hälfte zu haben 🐱❤️",
+        done: false,
+        deadline: null,
+        reminded: false,
+        repeat: "daily"
+      }];
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }
 
-      const deadline = document.createElement("small");
-      if (todo.deadline) {
-        const dueDate = new Date(todo.deadline);
-        if (todo.repeat === "once") {
-          if (!todo.done && dueDate < now) {
-            deadline.className = "overdue-text";
-            li.classList.add("overdue");
-            deadline.textContent = `Überfällig seit ${dueDate.toLocaleString()}`;
-          } else {
-            deadline.textContent = `Fällig: ${dueDate.toLocaleString()}`;
+    function saveTodos() {
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }
+
+    function renderTodos() {
+      todoList.innerHTML = "";
+      const now = new Date();
+      todos.forEach((todo, index) => {
+        const li = document.createElement("li");
+        li.className = todo.done ? "done" : "";
+
+        const content = document.createElement("span");
+        content.textContent = todo.text + (todo.repeat === "daily" ? " (Täglich)" : "");
+
+        const deadline = document.createElement("small");
+        if (todo.deadline) {
+          const dueDate = new Date(todo.deadline);
+          if (todo.repeat === "once") {
+            if (!todo.done && dueDate < now) {
+              deadline.className = "overdue-text";
+              li.classList.add("overdue");
+              deadline.textContent = `Überfällig seit ${dueDate.toLocaleString()}`;
+            } else {
+              deadline.textContent = `Fällig: ${dueDate.toLocaleString()}`;
+            }
           }
         }
-      }
 
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = todo.done;
-      checkbox.addEventListener("change", () => {
-        todos[index].done = checkbox.checked;
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = todo.done;
+        checkbox.addEventListener("change", () => {
+          todos[index].done = checkbox.checked;
+          saveTodos();
+          renderTodos();
+        });
+
+        const editButton = document.createElement("button");
+        editButton.textContent = "✏️";
+        editButton.title = "Bearbeiten";
+        editButton.onclick = () => editTask(index);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "🗑️";
+        deleteButton.title = "Löschen";
+        deleteButton.onclick = () => deleteTask(index);
+
+        const wrapper = document.createElement("div");
+        wrapper.style.display = "flex";
+        wrapper.style.flexDirection = "column";
+        wrapper.appendChild(content);
+        wrapper.appendChild(deadline);
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        actions.appendChild(checkbox);
+        actions.appendChild(editButton);
+        actions.appendChild(deleteButton);
+
+        li.appendChild(wrapper);
+        li.appendChild(actions);
+        todoList.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const text = document.getElementById("taskInput").value.trim();
+      const deadline = document.getElementById("deadlineInput").value || new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+      const repeat = document.getElementById("repeatInput").value;
+      if (text) {
+        todos.push({ text, done: false, deadline, reminded: false, repeat });
         saveTodos();
         renderTodos();
+        document.getElementById("taskInput").value = "";
+        document.getElementById("deadlineInput").value = "";
+        document.getElementById("repeatInput").value = "daily";
+      }
+    }
+
+    function deleteTask(index) {
+      todos.splice(index, 1);
+      saveTodos();
+      renderTodos();
+    }
+
+    function editTask(index) {
+      const newText = prompt("Bearbeite deine Aufgabe:", todos[index].text);
+      if (newText !== null) {
+        todos[index].text = newText.trim();
+        saveTodos();
+        renderTodos();
+      }
+    }
+
+    function checkReminders() {
+      const now = new Date();
+      let messages = [];
+      todos.forEach((todo) => {
+        if (!todo.done && todo.deadline) {
+          const due = new Date(todo.deadline);
+          const diff = due - now;
+          if (diff < 60 * 60 * 1000 && diff > 0) {
+            messages.push(`⏰ Erinnerung: "${todo.text}" ist bald fällig (${due.toLocaleTimeString()})`);
+          }
+        }
       });
-
-      const editButton = document.createElement("button");
-      editButton.textContent = "✏️";
-      editButton.title = "Bearbeiten";
-      editButton.onclick = () => editTask(index);
-
-      const deleteButton = document.createElement("button");
-      deleteButton.textContent = "🗑️";
-      deleteButton.title = "Löschen";
-      deleteButton.onclick = () => deleteTask(index);
-
-      const wrapper = document.createElement("div");
-      wrapper.style.display = "flex";
-      wrapper.style.flexDirection = "column";
-      wrapper.appendChild(content);
-      wrapper.appendChild(deadline);
-
-      const actions = document.createElement("div");
-      actions.className = "actions";
-      actions.appendChild(checkbox);
-      actions.appendChild(editButton);
-      actions.appendChild(deleteButton);
-
-      li.appendChild(wrapper);
-      li.appendChild(actions);
-      todoList.appendChild(li);
-    });
-  }
-
-  function addTask() {
-    const text = document.getElementById("taskInput").value.trim();
-    const deadline = document.getElementById("deadlineInput").value || new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
-    const repeat = document.getElementById("repeatInput").value;
-    if (text) {
-      todos.push({ text, done: false, deadline, reminded: false, repeat });
-      saveTodos();
-      renderTodos();
-      document.getElementById("taskInput").value = "";
-      document.getElementById("deadlineInput").value = "";
-      document.getElementById("repeatInput").value = "daily";
+      if (messages.length > 0) {
+        reminderBox.innerHTML = messages.join("<br>");
+        reminderBox.style.display = "block";
+      } else {
+        reminderBox.style.display = "none";
+      }
     }
-  }
 
-  function deleteTask(index) {
-    todos.splice(index, 1);
-    saveTodos();
     renderTodos();
-  }
+    checkReminders();
+    setInterval(checkReminders, 5 * 60 * 1000);
 
-  function editTask(index) {
-    const newText = prompt("Bearbeite deine Aufgabe:", todos[index].text);
-    if (newText !== null) {
-      todos[index].text = newText.trim();
-      saveTodos();
+    /* -----------------------------------
+       Kalender-Logik
+       ----------------------------------- */
+    let currentYear, currentMonth; // numerisch: z. B. 2025, 0…11
+
+    const calendarTitle = document.getElementById("calendarTitle");
+    const calendarGrid = document.getElementById("calendarGrid");
+    const prevMonthBtn = document.getElementById("prevMonth");
+    const nextMonthBtn = document.getElementById("nextMonth");
+
+    function openCalendar() {
+      // Aktuelles Jahr/Monat setzen, falls noch nicht initialisiert
+      const today = new Date();
+      currentYear = today.getFullYear();
+      currentMonth = today.getMonth();
+      showCalendar();
+      // To-Do-Liste ausblenden, Kalender einblenden
+      todoContainer.style.display = "none";
+      reminderBox.style.display = "none";
+      snakeContainer.style.display = "none";
+      calendarContainer.style.display = "block";
+    }
+
+    function closeCalendar() {
+      todoContainer.style.display = "block";
+      reminderBox.style.display = todos.length ? "block" : "none";
+      calendarContainer.style.display = "none";
       renderTodos();
     }
-  }
 
-  function checkReminders() {
-    const now = new Date();
-    let messages = [];
-    todos.forEach((todo) => {
-      if (!todo.done && todo.deadline) {
-        const due = new Date(todo.deadline);
-        const diff = due - now;
-        if (diff < 60 * 60 * 1000 && diff > 0) {
-          messages.push(`⏰ Erinnerung: "${todo.text}" ist bald fällig (${due.toLocaleTimeString()})`);
+    function showCalendar() {
+      // Titel z. B. „Juni 2025“
+      const monthNames = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+      calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+      // Kalender-Tabelle aufbauen
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 0 (So) … 6 (Sa)
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      let html = '<table class="calendar"><thead><tr>';
+      const weekdayNames = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+      for (let wd of weekdayNames) {
+        html += `<th>${wd}</th>`;
+      }
+      html += '</tr></thead><tbody><tr>';
+
+      // Leere Zellen für den ersten Wochentag
+      let dayOfWeek = firstDay;
+      for (let i = 0; i < firstDay; i++) {
+        html += '<td></td>';
+      }
+
+      // Zellen für alle Tage
+      for (let day = 1; day <= daysInMonth; day++) {
+        // Wenn Wochentag neu beginnt und nicht der erste Tag des Monats
+        if (dayOfWeek === 7) {
+          dayOfWeek = 0;
+          html += '</tr><tr>';
+        }
+        // Markiere heute
+        const today = new Date();
+        const isToday = (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear());
+        html += `<td${isToday ? ' class="today"' : ''}>`;
+        html += `<span class="date-number">${day}</span>`;
+
+        // Aufgaben in diesem Datum auflisten
+        const cellDate = new Date(currentYear, currentMonth, day);
+        const tasksOnThisDay = todos.filter(todo => {
+          if (!todo.deadline) return false;
+          const d = new Date(todo.deadline);
+          return (
+            d.getFullYear() === cellDate.getFullYear() &&
+            d.getMonth() === cellDate.getMonth() &&
+            d.getDate() === cellDate.getDate()
+          );
+        });
+        if (tasksOnThisDay.length) {
+          html += '<ul>';
+          tasksOnThisDay.forEach(task => {
+            html += `<li>${task.text}</li>`;
+          });
+          html += '</ul>';
+        }
+
+        html += '</td>';
+        dayOfWeek++;
+      }
+
+      // Restliche Zellen der letzten Woche
+      while (dayOfWeek < 7) {
+        html += '<td></td>';
+        dayOfWeek++;
+      }
+
+      html += '</tr></tbody></table>';
+      calendarGrid.innerHTML = html;
+    }
+
+    prevMonthBtn.addEventListener("click", () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      showCalendar();
+    });
+    nextMonthBtn.addEventListener("click", () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      showCalendar();
+    });
+
+    /* -----------------------------------
+       Snake-Spiel Logik (mit Touch/Swipe)
+       ----------------------------------- */
+    const canvas = document.getElementById("snakeCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreDisplay = document.getElementById("snakeScore");
+
+    const gridSize = 15;          // Anzahl Zellen pro Zeile/Spalte
+    const cellSize = 20;          // Pixel pro Zelle (gridSize * cellSize = 300)
+    let snake;                    // Array von {x, y}-Positionen der Segmente
+    let direction;                // Aktuelle Bewegungsrichtung: {x: -1/0/1, y: -1/0/1}
+    let food;                     // Position des Essens {x, y}
+    let gameInterval;             // Referenz auf setInterval
+    let score;                    // Punkte (Länge - 1)
+
+    // Touch-Variablen für Swipe-Erkennung
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    function startNewGame() {
+      // Initialisierung
+      snake = [
+        { x: 7, y: 7 },
+        { x: 6, y: 7 },
+        { x: 5, y: 7 }
+      ];
+      direction = { x: 1, y: 0 }; // Start bewegt sich nach rechts
+      placeFood();
+      score = snake.length - 1;
+      scoreDisplay.textContent = `Punkte: ${score}`;
+      // Falls schon ein Interval läuft, abbrechen
+      if (gameInterval) {
+        clearInterval(gameInterval);
+      }
+      document.addEventListener("keydown", handleKeydown);
+      // Touch-Listener hinzufügen
+      canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+      canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+      canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
+
+      gameInterval = setInterval(gameLoop, 100); // 100 ms pro Frame
+    }
+
+    function closeSnake() {
+      // Stoppe das Spiel
+      clearInterval(gameInterval);
+      document.removeEventListener("keydown", handleKeydown);
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchend", handleTouchEnd);
+      // Verberge Snake, zeige ToDo-Liste
+      snakeContainer.style.display = "none";
+      calendarContainer.style.display = "none";
+      todoContainer.style.display = "block";
+      reminderBox.style.display = todos.length ? "block" : "none";
+    }
+
+    function openSnake() {
+      // Verberge alle anderen Container
+      todoContainer.style.display = "none";
+      reminderBox.style.display = "none";
+      calendarContainer.style.display = "none";
+      // Zeige Snake-Container und starte Spiel
+      snakeContainer.style.display = "block";
+      startNewGame();
+    }
+
+    function placeFood() {
+      // Zufällige Position, die nicht auf der Schlange liegt
+      let valid = false;
+      while (!valid) {
+        const x = Math.floor(Math.random() * gridSize);
+        const y = Math.floor(Math.random() * gridSize);
+        valid = !snake.some(segment => segment.x === x && segment.y === y);
+        if (valid) {
+          food = { x, y };
         }
       }
-    });
-    if (messages.length > 0) {
-      reminderBox.innerHTML = messages.join("<br>");
-      reminderBox.style.display = "block";
-    } else {
-      reminderBox.style.display = "none";
     }
-  }
 
-  renderTodos();
-  checkReminders();
-  setInterval(checkReminders, 5 * 60 * 1000);
-</script>
+    function handleKeydown(e) {
+      // Neue Richtung basierend auf Pfeiltasten, ohne 180°-Wende
+      const key = e.key;
+      if (key === "ArrowUp" && direction.y !== 1) {
+        direction = { x: 0, y: -1 };
+      } else if (key === "ArrowDown" && direction.y !== -1) {
+        direction = { x: 0, y: 1 };
+      } else if (key === "ArrowLeft" && direction.x !== 1) {
+        direction = { x: -1, y: 0 };
+      } else if (key === "ArrowRight" && direction.x !== -1) {
+        direction = { x: 1, y: 0 };
+      }
+    }
 
+    /* --------------------------
+       Touch-Handler (Swipe-Erkennung)
+       -------------------------- */
+    function handleTouchStart(evt) {
+      evt.preventDefault();
+      const touch = evt.changedTouches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }
+
+    function handleTouchMove(evt) {
+      evt.preventDefault();
+      // nur PreventDefault, damit Seite nicht scrollt
+    }
+
+    function handleTouchEnd(evt) {
+      evt.preventDefault();
+      const touch = evt.changedTouches[0];
+      touchEndX = touch.clientX;
+      touchEndY = touch.clientY;
+      handleSwipeGesture();
+    }
+
+    function handleSwipeGesture() {
+      const dx = touchEndX - touchStartX;
+      const dy = touchEndY - touchStartY;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+
+      // Minimale Distanz (in Pixel), um als Swipe zu gelten
+      const minDistance = 20;
+      if (absDx > absDy && absDx > minDistance) {
+        // horizontaler Swipe
+        if (dx > 0 && direction.x !== -1) {
+          direction = { x: 1, y: 0 }; // Swipe nach rechts
+        } else if (dx < 0 && direction.x !== 1) {
+          direction = { x: -1, y: 0 }; // Swipe nach links
+        }
+      } else if (absDy > absDx && absDy > minDistance) {
+        // vertikaler Swipe
+        if (dy > 0 && direction.y !== -1) {
+          direction = { x: 0, y: 1 }; // Swipe nach unten
+        } else if (dy < 0 && direction.y !== 1) {
+          direction = { x: 0, y: -1 }; // Swipe nach oben
+        }
+      }
+      // Sonst kein Swipe (zu kurz / diagonal), dann ignorieren
+    }
+
+    function gameLoop() {
+      // Neue Kopfposition berechnen
+      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+      // Kollision mit Wänden?
+      if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
+        gameOver();
+        return;
+      }
+      // Kollision mit sich selbst?
+      if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+        gameOver();
+        return;
+      }
+
+      // Schlange verschieben: neues Kopf-Segment vorne einfügen
+      snake.unshift(head);
+
+      // Überprüfen, ob wir Essen gefressen haben
+      if (head.x === food.x && head.y === food.y) {
+        // Punkte erhöhen und neues Essen platzieren
+        score = snake.length - 1;
+        scoreDisplay.textContent = `Punkte: ${score}`;
+        placeFood();
+      } else {
+        // Letztes Segment entfernen (Schlange bleibt gleich lang)
+        snake.pop();
+      }
+
+      drawGame();
+    }
+
+    function drawGame() {
+      // Hintergrund löschen
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Essen zeichnen
+      ctx.fillStyle = "#e74c3c";
+      ctx.fillRect(food.x * cellSize, food.y * cellSize, cellSize, cellSize);
+
+      // Schlange zeichnen
+      ctx.fillStyle = "#2ecc71";
+      snake.forEach((segment, index) => {
+        ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+        // Kontur für Kopf etwas heller
+        if (index === 0) {
+          ctx.strokeStyle = "#27ae60";
+          ctx.strokeRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
+        }
+      });
+    }
+
+    function gameOver() {
+      clearInterval(gameInterval);
+      document.removeEventListener("keydown", handleKeydown);
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchend", handleTouchEnd);
+      setTimeout(() => {
+        alert(`Spiel vorbei! Deine Punktzahl: ${score}`);
+      }, 10);
+    }
+
+    /* -----------------------------------
+       Menü­einträge konfigurieren
+       ----------------------------------- */
+    document.getElementById("menuDashboard").addEventListener("click", () => {
+      toggleSidebar();
+      closeSnake();
+      closeCalendar();
+    });
+    document.getElementById("menuCalendar").addEventListener("click", () => {
+      toggleSidebar();
+      closeSnake();
+      openCalendar();
+    });
+    document.getElementById("menuSnake").addEventListener("click", () => {
+      toggleSidebar();
+      openSnake();
+    });
+    document.getElementById("menuCategories").addEventListener("click", () => {
+      toggleSidebar();
+      alert("Kategorien/Projekte (Später implementieren).");
+    });
+    document.getElementById("menuPriorities").addEventListener("click", () => {
+      toggleSidebar();
+      alert("Prioritäten (Später implementieren).");
+    });
+    document.getElementById("menuStatistics").addEventListener("click", () => {
+      toggleSidebar();
+      alert("Statistiken / Fortschritt (Später implementieren).");
+    });
+    document.getElementById("menuReminders").addEventListener("click", () => {
+      toggleSidebar();
+      alert("Erinnerungs-Einstellungen (Später implementieren).");
+    });
+    document.getElementById("menuSettings").addEventListener("click", () => {
+      toggleSidebar();
+      alert("Einstellungen (Später implementieren).");
+    });
+    document.getElementById("menuExport").addEventListener("click", () => {
+      toggleSidebar();
+      alert("Export / Import (Später implementieren).");
+    });
+    document.getElementById("menuAbout").addEventListener("click", () => {
+      toggleSidebar();
+      alert("Über / Hilfe (Später implementieren).");
+    });
+  </script>
 </body>
 </html>
-

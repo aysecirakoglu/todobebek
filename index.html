@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-image: url('https://static.vecteezy.com/ti/gratis-vektor/p1/3423841-susse-katze-cartoon-gekritzel-nahtloses-muster-hintergrund-hintergrundbild-vektor.jpg');
+      background-image: url('https://media.istockphoto.com/id/1487283582/de/foto/silber-getigerte-katze-lugt-hinter-einer-wei%C3%9Fen-wand-hervor.jpg?s=612x612&w=0&k=20&c=YOOiqQodz-Ffl71ZVz-VdY1hcZUmYSwFylh97eM5Z0A=');
       background-repeat: no-repeat;
       background-size: cover;
       background-attachment: fixed;
@@ -31,7 +31,7 @@
       border-radius: 16px;
       box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
-    input, button {
+    input, select, button {
       padding: 0.6rem;
       margin: 0.4rem 0;
       width: 100%;
@@ -67,6 +67,13 @@
     li.done span {
       text-decoration: line-through;
       color: grey;
+    }
+    li.overdue {
+      background-color: #ffe5e5;
+    }
+    small.overdue-text {
+      color: red;
+      font-weight: bold;
     }
     small {
       color: #777;
@@ -113,10 +120,16 @@
   </style>
 </head>
 <body>
+  <div style="background-color: rgba(255, 255, 255, 0.85); padding: 0.5rem 1rem; border-radius: 12px; max-width: 90%; margin: 1rem auto; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <h1>🐾 Tayfuns ToDos</h1>
+</div>
   <div class="todo">
     <input type="text" id="taskInput" placeholder="Neue Aufgabe..." />
-    <input type="datetime-local" id="deadlineInput" title="Deadline" />
+    <input type="datetime-local" id="deadlineInput" placeholder="Deadline" title="Deadline" aria-label="Deadline">
+    <select id="repeatInput">
+      <option value="once">Einmalig</option>
+      <option value="daily" selected>Täglich</option>
+    </select>
     <button onclick="addTask()">Hinzufügen</button>
     <ul id="todoList"></ul>
   </div>
@@ -126,7 +139,15 @@
   <script>
     const todoList = document.getElementById("todoList");
     const reminderBox = document.getElementById("reminderBox");
-    let todos = JSON.parse(localStorage.getItem("todos") || "[]");
+    let todos = JSON.parse(localStorage.getItem("todos") || "null") || [
+  {
+    text: "Wasser trinken",
+    done: false,
+    deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    reminded: false,
+    repeat: "daily"
+  }
+];
 
     function saveTodos() {
       localStorage.setItem("todos", JSON.stringify(todos));
@@ -134,21 +155,38 @@
 
     function renderTodos() {
       todoList.innerHTML = "";
+      const now = new Date();
       todos.forEach((todo, index) => {
         const li = document.createElement("li");
         li.className = todo.done ? "done" : "";
 
         const content = document.createElement("span");
-        content.textContent = todo.text;
+        content.textContent = todo.text + (todo.repeat === "daily" ? " (Täglich)" : "");
 
         const deadline = document.createElement("small");
-        deadline.textContent = todo.deadline ? Fällig: ${new Date(todo.deadline).toLocaleString()} : "";
+        if (todo.deadline) {
+          const dueDate = new Date(todo.deadline);
+          if (!todo.done && dueDate < now) {
+            deadline.className = "overdue-text";
+            li.classList.add("overdue");
+            deadline.textContent = `Überfällig seit ${dueDate.toLocaleString()}`;
+          } else {
+            deadline.textContent = `Fällig: ${dueDate.toLocaleString()}`;
+          }
+        }
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = todo.done;
         checkbox.addEventListener("change", () => {
-          todos[index].done = !todos[index].done;
+          if (todo.repeat === "daily" && checkbox.checked) {
+            const nextDay = new Date(todo.deadline);
+            nextDay.setDate(nextDay.getDate() + 1);
+            todos[index].deadline = nextDay.toISOString();
+            todos[index].done = false;
+          } else {
+            todos[index].done = checkbox.checked;
+          }
           saveTodos();
           renderTodos();
         });
@@ -183,13 +221,15 @@
 
     function addTask() {
       const text = document.getElementById("taskInput").value.trim();
-      const deadline = document.getElementById("deadlineInput").value;
+      const deadline = document.getElementById("deadlineInput").value || new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+      const repeat = document.getElementById("repeatInput").value;
       if (text) {
-        todos.push({ text, done: false, deadline, reminded: false });
+        todos.push({ text, done: false, deadline, reminded: false, repeat });
         saveTodos();
         renderTodos();
         document.getElementById("taskInput").value = "";
         document.getElementById("deadlineInput").value = "";
+        document.getElementById("repeatInput").value = "daily";
       }
     }
 
@@ -211,12 +251,12 @@
     function checkReminders() {
       const now = new Date();
       let messages = [];
-      todos.forEach((todo, i) => {
+      todos.forEach((todo) => {
         if (!todo.done && todo.deadline) {
           const due = new Date(todo.deadline);
           const diff = due - now;
           if (diff < 60 * 60 * 1000 && diff > 0) {
-            messages.push(⏰ Erinnerung: "${todo.text}" ist bald fällig (${due.toLocaleTimeString()}));
+            messages.push(`⏰ Erinnerung: "${todo.text}" ist bald fällig (${due.toLocaleTimeString()})`);
           }
         }
       });

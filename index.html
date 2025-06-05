@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tayfuns ToDos & Snake-Spiel (mit Touch-Steuerung)</title>
+  <title>Tayfuns ToDos 🐒  </title>
   <style>
     /* --------------------------
-       Grund-Styles (unverändert)
+       Grund-Styles
        -------------------------- */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,7 +18,7 @@
       padding: 1rem;
       margin: 0;
       color: #333;
-      overflow-x: hidden; /* Verhindert horizontales Scrollen, wenn Sidebar offen ist */
+      overflow-x: hidden;
     }
     h1 {
       text-align: center;
@@ -26,7 +26,14 @@
       font-size: 2rem;
       margin: 0.5rem;
     }
-    .todo, .calendar-container, .snake-container {
+    .todo,
+    .calendar-container,
+    .snake-container,
+    .today-container,
+    .stats-container,
+    .love-container,
+    .herr-container,
+    .quest-container {
       width: 80%;
       max-width: 600px;
       margin: 1rem auto;
@@ -37,7 +44,7 @@
       position: relative;
       z-index: 1;
     }
-    input, select, button {
+    input, select, button, textarea {
       padding: 0.6rem;
       margin: 0.4rem 0;
       width: 100%;
@@ -118,7 +125,14 @@
       h1 {
         font-size: 1.5rem;
       }
-      .todo, .calendar-container, .snake-container {
+      .todo,
+      .calendar-container,
+      .snake-container,
+      .today-container,
+      .stats-container,
+      .love-container,
+      .herr-container,
+      .quest-container {
         padding: 0.8rem;
       }
       input, button {
@@ -127,9 +141,8 @@
     }
 
     /* --------------------------
-       Neue Styles: Hamburger & Sidebar
+       Hamburger & Sidebar
        -------------------------- */
-    /* Hamburger-Button (oben links) */
     .hamburger {
       position: fixed;
       top: 1rem;
@@ -149,7 +162,6 @@
       border-radius: 2px;
       transition: all 0.3s ease;
     }
-    /* Linien werden animiert, wenn aktiv */
     .hamburger.active div:nth-child(1) {
       transform: rotate(45deg) translate(6px, 6px);
     }
@@ -159,8 +171,6 @@
     .hamburger.active div:nth-child(3) {
       transform: rotate(-45deg) translate(6px, -6px);
     }
-
-    /* Overlay für Hintergrund abdunkeln */
     #overlay {
       position: fixed;
       top: 0;
@@ -177,12 +187,10 @@
       opacity: 1;
       visibility: visible;
     }
-
-    /* Sidebar-Menü (versteckt, rutscht rein) */
     #sidebar {
       position: fixed;
       top: 0;
-      left: -260px; /* Außerhalb des Bildschirms starten */
+      left: -260px;
       width: 260px;
       height: 100%;
       background: #ffffffcc;
@@ -194,9 +202,8 @@
       flex-direction: column;
     }
     #sidebar.show {
-      left: 0; /* Wenn aktiv, reinziehen */
+      left: 0;
     }
-    /* Menü-Einträge */
     #sidebar ul {
       list-style: none;
       padding: 0;
@@ -214,7 +221,6 @@
     #sidebar ul li:hover {
       background: #f0f0f0;
     }
-    /* „Schließen“-Knopf rechts oben in der Sidebar */
     #sidebar .close-btn {
       align-self: flex-end;
       margin: 0.5rem 1rem;
@@ -222,8 +228,6 @@
       cursor: pointer;
       color: #333;
     }
-
-    /* Footer-Bereich in Sidebar (z. B. Version, Kontakt) */
     #sidebar .sidebar-footer {
       padding: 1rem;
       font-size: 0.85rem;
@@ -292,8 +296,8 @@
        -------------------------- */
     .snake-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: center;
       margin-bottom: 1rem;
     }
     .snake-title {
@@ -306,13 +310,136 @@
       margin: 0 auto;
       border: 2px solid #333;
       border-radius: 8px;
-      touch-action: none; /* verhindert Scrollen bei Swipes */
+      touch-action: none;
     }
     .snake-score {
       text-align: center;
       margin-top: 0.5rem;
       font-size: 1rem;
       font-weight: bold;
+    }
+
+    /* --------------------------
+       Heute-Styles
+       -------------------------- */
+    .today-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .today-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    .today-list li {
+      padding: 0.5rem;
+      border-bottom: 1px solid #ddd;
+      font-size: 1rem;
+    }
+
+    /* --------------------------
+       Statistiken-Styles
+       -------------------------- */
+    .stats-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .stats-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    .stats-content {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    /* --------------------------
+       Liebe-Styles
+       -------------------------- */
+    .love-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .love-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    .heart-button {
+      font-size: 3rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #e74c3c;
+      transition: transform 0.2s;
+    }
+    .heart-button:hover {
+      transform: scale(1.2);
+    }
+    .love-message {
+      margin-top: 1rem;
+      font-size: 1rem;
+      text-align: center;
+      color: #333;
+      min-height: 2rem;
+    }
+
+    /* --------------------------
+       Herr Bauleiter-Styles
+       -------------------------- */
+    .herr-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .herr-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    .character {
+      display: inline-block;
+      margin: 1rem;
+      padding: 1rem;
+      background: #f0f0f0;
+      border: 2px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      user-select: none;
+    }
+    .caught {
+      background: #d3ffd3;
+      border-color: #2ecc71;
+      text-decoration: line-through;
+      color: #777;
+      cursor: default;
+    }
+
+    /* --------------------------
+       Special Quest-Styles
+       -------------------------- */
+    .quest-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .quest-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    #questInput {
+      margin-bottom: 0.5rem;
+    }
+    #questResponse {
+      margin-top: 0.5rem;
+      font-weight: bold;
+      min-height: 1.5rem;
     }
   </style>
 </head>
@@ -325,7 +452,7 @@
     <div></div>
   </div>
 
-  <!-- Overlay (dunkler Hintergrund) -->
+  <!-- Overlay -->
   <div id="overlay"></div>
 
   <!-- Sidebar-Menü -->
@@ -333,15 +460,13 @@
     <span class="close-btn" id="closeSidebar">&times;</span>
     <ul>
       <li id="menuDashboard">🏠 Dashboard / Übersicht</li>
-      <li id="menuCalendar">📅 Kalender-Ansicht</li>
-      <li id="menuSnake">🐍 Snake-Spiel</li>
-      <li id="menuCategories">🗂️ Kategorien / Projekte</li>
-      <li id="menuPriorities">⭐ Prioritäten</li>
-      <li id="menuStatistics">📊 Statistiken / Fortschritt</li>
-      <li id="menuReminders">🔔 Erinnerungen</li>
-      <li id="menuSettings">⚙️ Einstellungen</li>
-      <li id="menuExport">💾 Export / Import</li>
-      <li id="menuAbout">ℹ️ Über / Hilfe</li>
+      <li id="menuToday">📅 Heute</li>
+      <li id="menuCalendar">📆 Kalender-Ansicht</li>
+      <li id="menuSnake">🐍 Snake</li>
+      <li id="menuHerr">👷 Herr Bauleiter!!!</li>
+      <li id="menuStats">📊 Statistiken / Fortschritt</li>
+      <li id="menuLove">❤️</li>
+      <li id="menuQuest">🔍 Special Quest</li>
     </ul>
     <div class="sidebar-footer">
       Version 1.0<br>
@@ -351,7 +476,7 @@
 
   <!-- Header -->
   <div style="background-color: rgba(255, 255, 255, 0.85); padding: 0.5rem 1rem; border-radius: 12px; max-width: 90%; margin: 1rem auto; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; z-index: 1;">
-    <h1>🐾 Tayfuns ToDos</h1>
+    <h1>🐾 Tayfuns ToDos 🐒 </h1>
   </div>
 
   <!-- ToDo-Liste -->
@@ -369,7 +494,15 @@
   <!-- Erinnerungskasten -->
   <div class="reminder" id="reminderBox"></div>
 
-  <!-- Kalender­ansicht (initial versteckt) -->
+  <!-- Heute-Ansicht (hidden) -->
+  <div class="today-container" id="todayContainer" style="display: none;">
+    <div class="today-header">
+      <span class="today-title">📅 Heute</span>
+    </div>
+    <ul class="today-list" id="todayList"></ul>
+  </div>
+
+  <!-- Kalender-Ansicht (hidden) -->
   <div class="calendar-container" id="calendarContainer" style="display: none;">
     <div class="calendar-header">
       <button id="prevMonth">&lt; Monat zurück</button>
@@ -379,20 +512,67 @@
     <div id="calendarGrid"></div>
   </div>
 
-  <!-- Snake-Spiel Container (initial versteckt) -->
+  <!-- Snake-Spiel Container (hidden) -->
   <div class="snake-container" id="snakeContainer" style="display: none;">
     <div class="snake-header">
-      <button onclick="closeSnake()">⏪ Zurück</button>
       <span class="snake-title">🐍 Snake-Spiel</span>
-      <button onclick="startNewGame()">🔄 Neu starten</button>
     </div>
     <canvas id="snakeCanvas" width="300" height="300"></canvas>
     <div class="snake-score" id="snakeScore">Punkte: 0</div>
+    <div style="text-align: center; margin-top: 1rem;">
+  <button onclick="startNewGame()">🔁 Neustart</button>
+</div>
+
+  </div>
+
+  <!-- Herr Bauleiter Container (hidden) -->
+<div class="herr-container" id="herrContainer" style="display: none;">
+  <div class="herr-header">
+    <span class="herr-title">👷 Herr Bauleiter!! Esteban und Sebastian sind entwischt! Sie können alleine nicht überleben, fang Sie ein!</span>
+  </div>
+  <div id="gameArea" style="position: relative; width: 100%; height: 400px; background: #f5f5f5; overflow: hidden; border-radius: 12px;"></div>
+  <div id="scoreDisplay1" style="text-align: center; margin-top: 1rem; font-weight: bold;">Gefangen: 0</div>
+  <div id="timerDisplay" style="text-align: center; margin-top: 0.5rem; font-weight: bold;">Zeit: 30</div>
+  <div style="text-align: center; margin-top: 1rem;">
+    <button onclick="startHerrGame()">Neustart</button>
+  </div>
+</div>
+
+  <!-- Statistiken-Ansicht (hidden) -->
+  <div class="stats-container" id="statsContainer" style="display: none;">
+    <div class="stats-header">
+      <span class="stats-title">📊 Statistiken & Fortschritt</span>
+    </div>
+    <div class="stats-content" id="statsContent"></div>
+  </div>
+
+  <!-- Liebe-Ansicht (hidden) -->
+  <div class="love-container" id="loveContainer" style="display: none;">
+    <div class="love-header">
+      <span class="love-title">❤️ Liebe</span>
+    </div>
+    <div style="text-align: center;">
+      <!-- Herz-Button wird jetzt korrekt angezeigt -->
+      <button class="heart-button" onclick="showRandomLove()">❤️</button>
+    </div>
+    <div class="love-message" id="loveMessage">
+      <!-- Hier erscheint der zufällige Text oder das Bild -->
+    </div>
+  </div>
+
+  <!-- Special Quest Container (hidden) -->
+  <div class="quest-container" id="questContainer" style="display: none;">
+    <div class="quest-header">
+      <span class="quest-title">🔍 Special Quest</span>
+    </div>
+    <input type="text" id="questInput" placeholder="Gib deinen Befehl ein..." />
+    <button onclick="handleQuest()">Abschicken</button>
+    <div id="questResponse"></div>
   </div>
 
   <script>
     /* -----------------------------------
-       Hamburger-Logik: öffnen / schließen
+       Hamburger-Logik
        ----------------------------------- */
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const sidebar = document.getElementById("sidebar");
@@ -404,21 +584,23 @@
       sidebar.classList.toggle("show");
       overlay.classList.toggle("show");
     }
-
-    // Klick auf Hamburger-Button öffnet oder schließt Sidebar
     hamburgerBtn.addEventListener("click", toggleSidebar);
-    // Klick auf Overlay oder „×“ schließt Sidebar
     overlay.addEventListener("click", toggleSidebar);
     closeSidebar.addEventListener("click", toggleSidebar);
 
     /* -----------------------------------
-       ToDo-Logik (wie zuvor angepasst)
+       ToDo-Logik (unverändert, nur hier komplett für Vollständigkeit)
        ----------------------------------- */
     const todoList = document.getElementById("todoList");
     const reminderBox = document.getElementById("reminderBox");
     const todoContainer = document.getElementById("todoContainer");
+    const todayContainer = document.getElementById("todayContainer");
     const calendarContainer = document.getElementById("calendarContainer");
     const snakeContainer = document.getElementById("snakeContainer");
+    const herrContainer = document.getElementById("herrContainer");
+    const statsContainer = document.getElementById("statsContainer");
+    const loveContainer = document.getElementById("loveContainer");
+    const questContainer = document.getElementById("questContainer");
 
     let todos;
     try {
@@ -428,7 +610,7 @@
       }
     } catch (e) {
       todos = [{
-        text: "Mich glücklich schätzen Ayse als meine zweite Hälfte zu haben 🐱❤️",
+        text: "Mich glücklich schätzen Ayse als meine zweite Hälfte zu haben❤️🐱",
         done: false,
         deadline: null,
         reminded: false,
@@ -556,9 +738,54 @@
     setInterval(checkReminders, 5 * 60 * 1000);
 
     /* -----------------------------------
+       Heute-Logik
+       ----------------------------------- */
+    const todayList = document.getElementById("todayList");
+
+    function openToday() {
+      // Verberge andere Container
+      todoContainer.style.display      = "none";
+      calendarContainer.style.display  = "none";
+      snakeContainer.style.display     = "none";
+      herrContainer.style.display      = "none";
+      statsContainer.style.display     = "none";
+      loveContainer.style.display      = "none";
+      questContainer.style.display     = "none";
+      reminderBox.style.display        = "none";
+
+      // Finde alle ToDos, deren Deadline auf den heutigen Tag fällt
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = today.getMonth();
+      const dd = today.getDate();
+
+      const todayTodos = todos.filter(todo => {
+        if (!todo.deadline || todo.done) return false;
+        const d = new Date(todo.deadline);
+        return d.getFullYear() === yyyy && d.getMonth() === mm && d.getDate() === dd;
+      });
+
+      // Liste anzeigen
+      todayList.innerHTML = "";
+      if (todayTodos.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "Keine ToDos für heute.";
+        todayList.appendChild(li);
+      } else {
+        todayTodos.forEach(todo => {
+          const li = document.createElement("li");
+          li.textContent = `${todo.text}${todo.repeat === "daily" ? " (Täglich)" : ""}`;
+          todayList.appendChild(li);
+        });
+      }
+
+      todayContainer.style.display = "block";
+    }
+
+    /* -----------------------------------
        Kalender-Logik
        ----------------------------------- */
-    let currentYear, currentMonth; // numerisch: z. B. 2025, 0…11
+    let currentYear, currentMonth;
 
     const calendarTitle = document.getElementById("calendarTitle");
     const calendarGrid = document.getElementById("calendarGrid");
@@ -566,32 +793,33 @@
     const nextMonthBtn = document.getElementById("nextMonth");
 
     function openCalendar() {
-      // Aktuelles Jahr/Monat setzen, falls noch nicht initialisiert
       const today = new Date();
       currentYear = today.getFullYear();
       currentMonth = today.getMonth();
       showCalendar();
-      // To-Do-Liste ausblenden, Kalender einblenden
-      todoContainer.style.display = "none";
-      reminderBox.style.display = "none";
-      snakeContainer.style.display = "none";
-      calendarContainer.style.display = "block";
+
+      todoContainer.style.display      = "none";
+      reminderBox.style.display        = "none";
+      snakeContainer.style.display     = "none";
+      herrContainer.style.display      = "none";
+      statsContainer.style.display     = "none";
+      loveContainer.style.display      = "none";
+      questContainer.style.display     = "none";
+      calendarContainer.style.display  = "block";
     }
 
     function closeCalendar() {
-      todoContainer.style.display = "block";
-      reminderBox.style.display = todos.length ? "block" : "none";
-      calendarContainer.style.display = "none";
+      todoContainer.style.display      = "block";
+      reminderBox.style.display        = todos.length ? "block" : "none";
+      calendarContainer.style.display  = "none";
       renderTodos();
     }
 
     function showCalendar() {
-      // Titel z. B. „Juni 2025“
       const monthNames = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
       calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
 
-      // Kalender-Tabelle aufbauen
-      const firstDay = new Date(currentYear, currentMonth, 1).getDay(); // 0 (So) … 6 (Sa)
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
       let html = '<table class="calendar"><thead><tr>';
       const weekdayNames = ["So","Mo","Di","Mi","Do","Fr","Sa"];
@@ -600,26 +828,21 @@
       }
       html += '</tr></thead><tbody><tr>';
 
-      // Leere Zellen für den ersten Wochentag
       let dayOfWeek = firstDay;
       for (let i = 0; i < firstDay; i++) {
         html += '<td></td>';
       }
 
-      // Zellen für alle Tage
       for (let day = 1; day <= daysInMonth; day++) {
-        // Wenn Wochentag neu beginnt und nicht der erste Tag des Monats
         if (dayOfWeek === 7) {
           dayOfWeek = 0;
           html += '</tr><tr>';
         }
-        // Markiere heute
         const today = new Date();
         const isToday = (day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear());
         html += `<td${isToday ? ' class="today"' : ''}>`;
         html += `<span class="date-number">${day}</span>`;
 
-        // Aufgaben in diesem Datum auflisten
         const cellDate = new Date(currentYear, currentMonth, day);
         const tasksOnThisDay = todos.filter(todo => {
           if (!todo.deadline) return false;
@@ -630,10 +853,14 @@
             d.getDate() === cellDate.getDate()
           );
         });
+
         if (tasksOnThisDay.length) {
           html += '<ul>';
           tasksOnThisDay.forEach(task => {
-            html += `<li>${task.text}</li>`;
+            const text = task.done
+              ? `<span style="text-decoration: line-through; color: grey;">${task.text}</span>`
+              : task.text;
+            html += `<li>${text}</li>`;
           });
           html += '</ul>';
         }
@@ -642,7 +869,6 @@
         dayOfWeek++;
       }
 
-      // Restliche Zellen der letzten Woche
       while (dayOfWeek < 7) {
         html += '<td></td>';
         dayOfWeek++;
@@ -676,70 +902,72 @@
     const ctx = canvas.getContext("2d");
     const scoreDisplay = document.getElementById("snakeScore");
 
-    const gridSize = 15;          // Anzahl Zellen pro Zeile/Spalte
-    const cellSize = 20;          // Pixel pro Zelle (gridSize * cellSize = 300)
-    let snake;                    // Array von {x, y}-Positionen der Segmente
-    let direction;                // Aktuelle Bewegungsrichtung: {x: -1/0/1, y: -1/0/1}
-    let food;                     // Position des Essens {x, y}
-    let gameInterval;             // Referenz auf setInterval
-    let score;                    // Punkte (Länge - 1)
+    const gridSize = 15;
+    const cellSize = 20;
+    let snake;
+    let direction;
+    let food;
+    let gameInterval;
+    let score;
 
-    // Touch-Variablen für Swipe-Erkennung
     let touchStartX = 0;
     let touchStartY = 0;
     let touchEndX = 0;
     let touchEndY = 0;
 
     function startNewGame() {
-      // Initialisierung
       snake = [
         { x: 7, y: 7 },
         { x: 6, y: 7 },
         { x: 5, y: 7 }
       ];
-      direction = { x: 1, y: 0 }; // Start bewegt sich nach rechts
+      direction = { x: 1, y: 0 };
       placeFood();
       score = snake.length - 1;
       scoreDisplay.textContent = `Punkte: ${score}`;
-      // Falls schon ein Interval läuft, abbrechen
       if (gameInterval) {
         clearInterval(gameInterval);
       }
       document.addEventListener("keydown", handleKeydown);
-      // Touch-Listener hinzufügen
       canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
       canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
       canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
 
-      gameInterval = setInterval(gameLoop, 100); // 100 ms pro Frame
+      gameInterval = setInterval(gameLoop, 100);
     }
 
     function closeSnake() {
-      // Stoppe das Spiel
       clearInterval(gameInterval);
       document.removeEventListener("keydown", handleKeydown);
       canvas.removeEventListener("touchstart", handleTouchStart);
       canvas.removeEventListener("touchmove", handleTouchMove);
       canvas.removeEventListener("touchend", handleTouchEnd);
-      // Verberge Snake, zeige ToDo-Liste
+
       snakeContainer.style.display = "none";
       calendarContainer.style.display = "none";
+      todayContainer.style.display = "none";
+      statsContainer.style.display = "none";
+      herrContainer.style.display = "none";
+      loveContainer.style.display = "none";
+      questContainer.style.display = "none";
       todoContainer.style.display = "block";
       reminderBox.style.display = todos.length ? "block" : "none";
     }
 
     function openSnake() {
-      // Verberge alle anderen Container
-      todoContainer.style.display = "none";
-      reminderBox.style.display = "none";
-      calendarContainer.style.display = "none";
-      // Zeige Snake-Container und starte Spiel
-      snakeContainer.style.display = "block";
+      todoContainer.style.display      = "none";
+      reminderBox.style.display        = "none";
+      calendarContainer.style.display  = "none";
+      todayContainer.style.display     = "none";
+      statsContainer.style.display     = "none";
+      loveContainer.style.display      = "none";
+      herrContainer.style.display      = "none";
+      questContainer.style.display     = "none";
+      snakeContainer.style.display     = "block";
       startNewGame();
     }
 
     function placeFood() {
-      // Zufällige Position, die nicht auf der Schlange liegt
       let valid = false;
       while (!valid) {
         const x = Math.floor(Math.random() * gridSize);
@@ -752,7 +980,6 @@
     }
 
     function handleKeydown(e) {
-      // Neue Richtung basierend auf Pfeiltasten, ohne 180°-Wende
       const key = e.key;
       if (key === "ArrowUp" && direction.y !== 1) {
         direction = { x: 0, y: -1 };
@@ -765,9 +992,6 @@
       }
     }
 
-    /* --------------------------
-       Touch-Handler (Swipe-Erkennung)
-       -------------------------- */
     function handleTouchStart(evt) {
       evt.preventDefault();
       const touch = evt.changedTouches[0];
@@ -777,7 +1001,6 @@
 
     function handleTouchMove(evt) {
       evt.preventDefault();
-      // nur PreventDefault, damit Seite nicht scrollt
     }
 
     function handleTouchEnd(evt) {
@@ -793,53 +1016,42 @@
       const dy = touchEndY - touchStartY;
       const absDx = Math.abs(dx);
       const absDy = Math.abs(dy);
-
-      // Minimale Distanz (in Pixel), um als Swipe zu gelten
       const minDistance = 20;
+
       if (absDx > absDy && absDx > minDistance) {
-        // horizontaler Swipe
         if (dx > 0 && direction.x !== -1) {
-          direction = { x: 1, y: 0 }; // Swipe nach rechts
+          direction = { x: 1, y: 0 };
         } else if (dx < 0 && direction.x !== 1) {
-          direction = { x: -1, y: 0 }; // Swipe nach links
+          direction = { x: -1, y: 0 };
         }
       } else if (absDy > absDx && absDy > minDistance) {
-        // vertikaler Swipe
         if (dy > 0 && direction.y !== -1) {
-          direction = { x: 0, y: 1 }; // Swipe nach unten
+          direction = { x: 0, y: 1 };
         } else if (dy < 0 && direction.y !== 1) {
-          direction = { x: 0, y: -1 }; // Swipe nach oben
+          direction = { x: 0, y: -1 };
         }
       }
-      // Sonst kein Swipe (zu kurz / diagonal), dann ignorieren
     }
 
     function gameLoop() {
-      // Neue Kopfposition berechnen
       const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-      // Kollision mit Wänden?
       if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
         gameOver();
         return;
       }
-      // Kollision mit sich selbst?
       if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
         gameOver();
         return;
       }
 
-      // Schlange verschieben: neues Kopf-Segment vorne einfügen
       snake.unshift(head);
 
-      // Überprüfen, ob wir Essen gefressen haben
       if (head.x === food.x && head.y === food.y) {
-        // Punkte erhöhen und neues Essen platzieren
         score = snake.length - 1;
         scoreDisplay.textContent = `Punkte: ${score}`;
         placeFood();
       } else {
-        // Letztes Segment entfernen (Schlange bleibt gleich lang)
         snake.pop();
       }
 
@@ -847,19 +1059,15 @@
     }
 
     function drawGame() {
-      // Hintergrund löschen
       ctx.fillStyle = "#111";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Essen zeichnen
       ctx.fillStyle = "#e74c3c";
       ctx.fillRect(food.x * cellSize, food.y * cellSize, cellSize, cellSize);
 
-      // Schlange zeichnen
       ctx.fillStyle = "#2ecc71";
       snake.forEach((segment, index) => {
         ctx.fillRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
-        // Kontur für Kopf etwas heller
         if (index === 0) {
           ctx.strokeStyle = "#27ae60";
           ctx.strokeRect(segment.x * cellSize, segment.y * cellSize, cellSize, cellSize);
@@ -879,49 +1087,361 @@
     }
 
     /* -----------------------------------
+       Herr Bauleiter Logik
+       ----------------------------------- */
+   
+let score1 = 0;
+let timeLeft = 30;
+let gameInterval1, spawnInterval, timerInterval;
+const gameArea = document.getElementById("gameArea");
+const scoreDisplay1 = document.getElementById("scoreDisplay1");
+const timerDisplay = document.getElementById("timerDisplay");
+
+ function openHerr() {
+      todoContainer.style.display      = "none";
+      reminderBox.style.display        = "none";
+      calendarContainer.style.display  = "none";
+      todayContainer.style.display     = "none";
+      statsContainer.style.display     = "none";
+      loveContainer.style.display      = "none";
+      herrContainer.style.display      = "block";
+      questContainer.style.display     = "none";
+      snakeContainer.style.display     = "none";
+      startHerrGame();
+    }
+
+function startHerrGame() {
+  score1 = 0;
+  timeLeft = 30;
+  scoreDisplay1.textContent = "Gefangen: 0";
+  timerDisplay.textContent = "Zeit: 30";
+  gameArea.innerHTML = "";
+  clearInterval(gameInterval1);
+  clearInterval(spawnInterval);
+  clearInterval(timerInterval);
+  
+  spawnInterval = setInterval(spawnCharacter, 500);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timerDisplay.textContent = `Zeit: ${timeLeft}`;
+    if (timeLeft <= 0) {
+      clearInterval(spawnInterval);
+      clearInterval(timerInterval);
+      alert(`Zeit abgelaufen! Du hast ${score1} gefangen.`);
+    }
+  }, 1000);
+}
+
+function spawnCharacter() {
+  const names = ["Esteban", "Sebastian"];
+  const name = names[Math.floor(Math.random() * names.length)];
+  const char = document.createElement("div");
+  char.textContent = name;
+  char.style.position = "absolute";
+  char.style.padding = "0.5rem";
+  char.style.background = "#fff";
+  char.style.border = "2px solid #333";
+  char.style.borderRadius = "8px";
+  char.style.cursor = "pointer";
+  char.style.fontWeight = "bold";
+  char.style.transition = "opacity 0.2s";
+
+  const x = Math.random() * (gameArea.clientWidth - 80);
+  const y = Math.random() * (gameArea.clientHeight - 40);
+  char.style.left = `${x}px`;
+  char.style.top = `${y}px`;
+
+  // Zufälliges Bild-Gesicht optional
+  const img = document.createElement("img");
+  img.src = "https://api.dicebear.com/7.x/adventurer/svg?seed=" + name;
+  img.alt = name;
+  img.style.width = "30px";
+  img.style.height = "30px";
+  img.style.borderRadius = "50%";
+  img.style.marginRight = "0.5rem";
+  img.style.verticalAlign = "middle";
+
+  const span = document.createElement("span");
+  span.textContent = ` ${name}`;
+  
+  char.innerHTML = "";
+  char.appendChild(img);
+  char.appendChild(span);
+
+  char.addEventListener("click", () => {
+    score1++;
+    scoreDisplay1.textContent = `Gefangen: ${score1}`;
+    char.remove();
+  });
+
+  gameArea.appendChild(char);
+
+  // Zufälliges Bewegen und Blinken
+  let opacity = 1;
+  const moveInterval = setInterval(() => {
+    if (!gameArea.contains(char)) return clearInterval(moveInterval);
+    const newX = Math.random() * (gameArea.clientWidth - 80);
+    const newY = Math.random() * (gameArea.clientHeight - 40);
+    char.style.left = `${newX}px`;
+    char.style.top = `${newY}px`;
+    opacity = opacity === 1 ? 0.2 : 1;
+    char.style.opacity = opacity;
+  }, 500);
+
+  // Selbstzerstörung nach 5 Sekunden
+  setTimeout(() => {
+    if (gameArea.contains(char)) {
+      gameArea.removeChild(char);
+      clearInterval(moveInterval);
+    }
+  }, 5000);
+}
+
+
+
+    /* -----------------------------------
+       Statistiken-Logik
+       ----------------------------------- */
+    const statsContentElem = document.getElementById("statsContent");
+
+    function openStats() {
+      todoContainer.style.display      = "none";
+      reminderBox.style.display        = "none";
+      calendarContainer.style.display  = "none";
+      snakeContainer.style.display     = "none";
+      todayContainer.style.display     = "none";
+      herrContainer.style.display      = "none";
+      loveContainer.style.display      = "none";
+      questContainer.style.display     = "none";
+
+      const total = todos.length;
+      const completed = todos.filter(t => t.done).length;
+      const pending = total - completed;
+      const overdueCount = todos.filter(t => {
+        if (!t.deadline || t.done) return false;
+        const due = new Date(t.deadline);
+        return due < new Date();
+      }).length;
+
+      let html = "";
+      html += `<p>Gesamtanzahl ToDos: <strong>${total}</strong></p>`;
+      html += `<p>Erledigte ToDos: <strong>${completed}</strong></p>`;
+      html += `<p>Offene ToDos: <strong>${pending}</strong></p>`;
+      html += `<p>Überfällige ToDos: <strong>${overdueCount}</strong></p>`;
+
+      const percentDone = total > 0 ? Math.round((completed / total) * 100) : 0;
+      html += `<p>Fortschritt: <strong>${percentDone}%</strong></p>`;
+      html += `
+        <div style="background: #ddd; border-radius: 8px; overflow: hidden; margin-top: 0.5rem;">
+          <div style="width: ${percentDone}%; background: #2ecc71; padding: 0.4rem 0; text-align: center; color: white; font-weight: bold;">
+            ${percentDone}%
+          </div>
+        </div>`;
+      statsContentElem.innerHTML = html;
+
+      statsContainer.style.display = "block";
+    }
+
+    function closeStats() {
+      statsContainer.style.display = "none";
+      todoContainer.style.display = "block";
+      reminderBox.style.display   = todos.length ? "block" : "none";
+      renderTodos();
+    }
+
+    /* -----------------------------------
+       Liebe-Logik
+       ----------------------------------- */
+    const loveMessageDiv = document.getElementById("loveMessage");
+
+    // Platzhalter: Texte und lokale Bilder
+    const loveEntries = [
+      { type: "text",  content: "Genieß das jetzt, statt dir stetig Gedanken um die Zukunft zu machen, sonst machst du die Gegenwart unschön. Wir werden nie in der Vergangenheit, oder Zukunft sein, immer nur in der Gegenwart. Die Gegenwart zählt und ist schön." },
+      { type: "text",  content: "Egal was dich gerade belastet, ich bin da, ruf mich an." },
+      { type: "text",  content: "Du fühlst dich an wie zuhause wenn du lächelst❤️." },
+      { type: "text",  content: "Wenn man schwere Zeiten in der Beziehung meistert, klärt, und daraus lernt, bedeutet es, dass die Liebe echt ist. Wir sind so noch schöner als am Anfang.❤️ " },
+      { type: "text",  content: "Allah prüft die jenigen die er liebt, egal was dir scheinbar schlechtes wiederfährt, sei geduldig. Für jedes Übel was dich trifft, werden einige deiner Sünden gelöscht. Sei dankbar ❤️." },
+      { type: "text",  content: "Wie geht es Ihnen heute schöner Mann?" },
+      { type: "text",  content: "Wenn du das liest, klicke auf den Menüpunkt Special Quest und tippe ein Ich bin ein Kapuzineräffchen" },
+      { type: "text",  content: "Wie kannst du hier chillen während Esteban und Sebastian auf der Flucht sind, FANG SIE EINN" },
+      { type: "text",  content: "Wenn du das liest, klicke auf den Menüpunkt Special Quest und tippe ein was macht ayse gerade" },
+      { type: "text",  content: "Wenn du das liest, klicke auf den Menüpunkt Special Quest und tippe ein ich bin ein kapuzineräffchen" },
+      { type: "text",  content: "Wenn du das liest, klicke auf den Menüpunkt Special Quest und tippe ein lieblingsgetränk" },
+      { type: "text",  content: "Seni seviyorum ❤️." },
+      { type: "text",  content: "Jede Beziehung bedeutet Arbeit, das klingt anstrengend. Aber an was muss man arbeiten? Müssen wir dran arbeiten, einander jeden Tag glücklich zu machen? Nein, das kommt von selbst. Müssen wir dran Arbeiten, einander zu vertrauen? Nein, Loyalität ist die Basis für eine gesunde Beziehung, wir vertrauen uns. Müssen wir daran Arbeiten einander zu lieben? Nein, auch das ist die Basis einer Beziehung, das ist gegeben. Was ist aber, wenn es ein Problem gibt? Wir kennen die schönen Seiten von einander und mittlerweile auch die Schwächen, die letzten Monate hab ich indem ich dich besser kannte gelernt, wie ich mit dir umgehen muss, wenn du gestresst oder genervt bist. Anfangs hab ich das alles auf mich projiziert, weil das meine Schwäche ist. Eine Beziehung fühlt sich nicht wie Arbeit an, wenn man bereit ist zu investieren und zu kommunizieren. Wenn es ein Problem gibt, wird es gelöst und ein Fehler nicht wiederholt." },
+      { type: "text",  content: "Lächel doch mal bruder hab ich hier aus Spaß ne munter-Tayfun-auf Webseite gebaut" },
+      { type: "text",  content: "Eins meiner Lieblingserinnerungen an dich ist, wie schön du auf den Gebetsteppich reagiert hast. Du warst in dem Moment die schönste Version von dir die ich bisher gesehen habe ❤️" },
+      { type: "text",  content: "Eins meiner Lieblingserinnerungen an dich ist, als wir bei Tipphi waren und anscheinend jeder wusste wir kommen zusammen (außer Ich). Der Tag war trotz meinem Rücken richtig schön" },
+      { type: "text",  content: "Eins meiner Lieblingserinnerungen an dich ist, als wir noch nicht zusammen waren und ich dachte ich muss jetzt mein Leben in Quangs Wohnung lassen weil mein Rücken gebrochen ist: Ich hätte nieeeemals so schnell soviel Nähe zulassen können wenn mein Rücken mich nicht gezwungen hätte- Deswegen war es umso schöner für mich ich war in 100% Schmerz 100045% nervös und 100% verliebt" },
+      { type: "text",  content: "Eins meiner Lieblingskindheitserinnerungen an dich ist, als wir an meinem Geburtstag nach dem Hotel noch nachts draußen waren irgendo am Gleis in Neuaubing mit Salar, ich voll Angst vor Dämonen hatte irgendein Geräusch aus dem Gebüsch kam, du neben mir standest und dann gesagt hast JEDER KÄMPFT FÜR SICH ALLEIN und dann losgelaufen bist. (Hab überlebt)" },
+      { type: "text",  content: "Eins meiner Lieblingskindheitserinnerungen an dich ist das letzte Mal, dass ich dich gesehen habe bevor wir zusammen gekommen sind. Du bist nachts aus deinem Balkon in Neuaubing geklettert, hast mir ein Sandwich gebracht und wir haben geredet. Dann bist du gegangen und als du das nächste mal gekommen bist, warst du erwachsen und wir saßen verliebt in einem indischen Restaurant." },
+      { type: "text",  content: "Eins meiner Lieblingserinnerungen an dich ist als ich zu Quang gekommen bin und du schon am Tacos machen warst. Ich achte eigentlich garnhicht aufs aussehen aber ich so Oh Oh der sieht ja voll gut aus WIESO SIND DIE HAARE NASS UND WIESO KANN DER GEMÜSE SO GUT SCHNEIDEN hab mich dann drauf konzentriert den ganzen Tag wegzugucken weil ich da noch garnicht mit Sicherheit wusste was deine Absicht mit mir ist und ich mich nach den schlechten Erfahrungen die ich davor gemacht hab schützen wollte. Whoopsie" },
+      { type: "image", content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0145.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0158.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0160.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0172.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0176.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0298.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0425.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0550.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0576.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0577.jpeg" },
+      {
+        type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0578.jpeg"
+      },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_0634.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/fc83bd3e-f3ef-46a3-a931-158ff94ff98f.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_1298.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_1618.jpeg" },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_1745.jpeg" },
+      {
+       type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_1839.jpeg"
+      },
+      { type: "image",
+        content: "https://raw.githubusercontent.com/aysecirakoglu/todobebek/main/IMG_3006.jpeg" }
+    ];
+
+    function openLove() {
+      todoContainer.style.display      = "none";
+      reminderBox.style.display        = "none";
+      calendarContainer.style.display  = "none";
+      snakeContainer.style.display     = "none";
+      todayContainer.style.display     = "none";
+      herrContainer.style.display      = "none";
+      statsContainer.style.display     = "none";
+      questContainer.style.display     = "none";
+
+      loveMessageDiv.innerHTML = "";
+      loveContainer.style.display = "block";
+    }
+
+    function closeLove() {
+      loveContainer.style.display   = "none";
+      todoContainer.style.display   = "block";
+      reminderBox.style.display     = todos.length ? "block" : "none";
+      renderTodos();
+    }
+
+    function showRandomLove() {
+      const idx = Math.floor(Math.random() * loveEntries.length);
+      const entry = loveEntries[idx];
+      const container = loveMessageDiv;
+
+      container.innerHTML = "";
+
+      if (entry.type === "text") {
+        const span = document.createElement("span");
+        span.textContent = entry.content;
+        container.appendChild(span);
+      } else if (entry.type === "image") {
+        const img = document.createElement("img");
+        img.src = entry.content;
+        img.alt = "Liebe-Bild";
+        img.style.maxWidth = "100%";
+        img.style.borderRadius = "8px";
+        container.appendChild(img);
+      }
+    }
+
+    /* -----------------------------------
+       Special Quest Logik
+       ----------------------------------- */
+    const questInput = document.getElementById("questInput");
+    const questResponse = document.getElementById("questResponse");
+
+    function handleQuest() {
+      const text = questInput.value.trim().toLowerCase();
+      let response = ""
+      if (text.includes("ich bin ein kapuzineräffchen")) {
+        response = "Für die Natur eines Kapuzineräffchens gehören regelmäßige Popoloch Untersuchungen seitens des Partners, das ist unumgänglich für das Überleben eines Kapuzineräffchens";
+      } else if (text.includes("hallo") || text.includes("hi")) {
+        response = "Hallo! Wie kann ich dir helfen?";
+      } else if (text.includes("was macht ayse gerade")) {
+        response = "Sie denkt an dich, sie denkt immer an dich egal was sie gerade macht. Und sie ist stolz auf dich, sie wünscht sich immer du könntest sehen wieviel du im Leben schon erreicht hast und wie toll du dich machst, aber das siehst du nicht, weil du gewohnt bist du zu sein. Aber sie ist stolz auf dich, immer";
+     } else if (text.includes("lieblingsgetränk")) {
+        response = "Was Coco?";  
+      } else {
+        response = "Versuchs nochmal, Ayse hat mir das nicht beigebracht.";
+      }
+      questResponse.textContent = response;
+    }
+
+    function openQuest() {
+      todoContainer.style.display      = "none";
+      reminderBox.style.display        = "none";
+      calendarContainer.style.display  = "none";
+      snakeContainer.style.display     = "none";
+      todayContainer.style.display     = "none";
+      herrContainer.style.display      = "none";
+      statsContainer.style.display     = "none";
+      loveContainer.style.display      = "none";
+      questContainer.style.display     = "block";
+      questInput.value = "";
+      questResponse.textContent = "";
+    }
+
+    function closeQuest() {
+      questContainer.style.display = "none";
+      todoContainer.style.display  = "block";
+      reminderBox.style.display    = todos.length ? "block" : "none";
+      renderTodos();
+    }
+
+    /* -----------------------------------
        Menü­einträge konfigurieren
        ----------------------------------- */
     document.getElementById("menuDashboard").addEventListener("click", () => {
       toggleSidebar();
       closeSnake();
+      closeHerr();
       closeCalendar();
+      closeStats();
+      closeLove();
+      closeQuest();
+    });
+    document.getElementById("menuToday").addEventListener("click", () => {
+      toggleSidebar();
+      openToday();
     });
     document.getElementById("menuCalendar").addEventListener("click", () => {
       toggleSidebar();
-      closeSnake();
       openCalendar();
     });
     document.getElementById("menuSnake").addEventListener("click", () => {
       toggleSidebar();
       openSnake();
     });
-    document.getElementById("menuCategories").addEventListener("click", () => {
+    document.getElementById("menuHerr").addEventListener("click", () => {
       toggleSidebar();
-      alert("Kategorien/Projekte (Später implementieren).");
+      openHerr();
     });
-    document.getElementById("menuPriorities").addEventListener("click", () => {
+    document.getElementById("menuStats").addEventListener("click", () => {
       toggleSidebar();
-      alert("Prioritäten (Später implementieren).");
+      openStats();
     });
-    document.getElementById("menuStatistics").addEventListener("click", () => {
+    document.getElementById("menuLove").addEventListener("click", () => {
       toggleSidebar();
-      alert("Statistiken / Fortschritt (Später implementieren).");
+      openLove();
     });
-    document.getElementById("menuReminders").addEventListener("click", () => {
+    document.getElementById("menuQuest").addEventListener("click", () => {
       toggleSidebar();
-      alert("Erinnerungs-Einstellungen (Später implementieren).");
-    });
-    document.getElementById("menuSettings").addEventListener("click", () => {
-      toggleSidebar();
-      alert("Einstellungen (Später implementieren).");
-    });
-    document.getElementById("menuExport").addEventListener("click", () => {
-      toggleSidebar();
-      alert("Export / Import (Später implementieren).");
-    });
-    document.getElementById("menuAbout").addEventListener("click", () => {
-      toggleSidebar();
-      alert("Über / Hilfe (Später implementieren).");
+      openQuest();
     });
   </script>
 </body>

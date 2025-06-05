@@ -180,13 +180,10 @@
         checkbox.type = "checkbox";
         checkbox.checked = todo.done;
         checkbox.addEventListener("change", () => {
-          if (todo.repeat === "daily" && checkbox.checked && todo.deadline) {
-          const nextDay = new Date(todo.deadline);
-          nextDay.setDate(nextDay.getDate() + 1);
-          todos[index].deadline = nextDay.toISOString();
-          todos[index].done = false;
+          if (checkbox.checked) {
+          todos[index].done = true;
         } else {
-          todos[index].done = checkbox.checked;
+          todos[index].done = false;
         } else {
             todos[index].done = checkbox.checked;
           }

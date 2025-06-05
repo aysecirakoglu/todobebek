@@ -136,9 +136,18 @@
   <div class="reminder" id="reminderBox"></div>
 
   <script>
-    const todoList = document.getElementById("todoList");
+      const todoList = document.getElementById("todoList");
     const reminderBox = document.getElementById("reminderBox");
-    let todos = JSON.parse(localStorage.getItem("todos") || "[]");
+    let todos = JSON.parse(localStorage.getItem("todos") || "null") || [
+  {
+    text: "Wasser trinken",
+    done: false,
+    deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    reminded: false,
+    repeat: "daily"
+  }
+];
+
 
     function saveTodos() {
       localStorage.setItem("todos", JSON.stringify(todos));

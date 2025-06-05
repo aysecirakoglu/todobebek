@@ -7,8 +7,8 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-image: url('https://static.vecteezy.com/ti/gratis-vektor/p1/3423841-susse-katze-cartoon-gekritzel-nahtloses-muster-hintergrund-hintergrundbild-vektor.jpg');
-      background-repeat: repeat;
+      background-image: url('https://media.istockphoto.com/id/1487283582/de/foto/silber-getigerte-katze-lugt-hinter-einer-wei%C3%9Fen-wand-hervor.jpg?s=612x612&w=0&k=20&c=YOOiqQodz-Ffl71ZVz-VdY1hcZUmYSwFylh97eM5Z0A=');
+      background-repeat: no-repeat;
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
@@ -120,7 +120,9 @@
   </style>
 </head>
 <body>
-  <h1>🐾 Tayfuns ToDos</h1>
+  <div style="background-color: rgba(255,255,255,0.85); padding: 0.5rem 1rem; border-radius: 12px; max-width: 90%; margin: 1rem auto; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center;">
+    <h1>🐾 Tayfuns ToDos</h1>
+  </div>
   <div class="todo">
     <input type="text" id="taskInput" placeholder="Neue Aufgabe..." />
     <label style="display: flex; align-items: center; gap: 0.5rem;"><input type="checkbox" id="enableDeadline" checked> Deadline setzen</label>
@@ -142,7 +144,7 @@
       {
         text: "Wasser trinken",
         done: false,
-        deadline: none,
+        deadline: null,
         reminded: false,
         repeat: "daily"
       }
@@ -178,12 +180,14 @@
         checkbox.type = "checkbox";
         checkbox.checked = todo.done;
         checkbox.addEventListener("change", () => {
-          if (todo.repeat === "daily" && checkbox.checked) {
-            const nextDay = new Date(todo.deadline);
-            nextDay.setDate(nextDay.getDate() + 1);
-            todos[index].deadline = nextDay.toISOString();
-            todos[index].done = false;
-          } else {
+          if (todo.repeat === "daily" && checkbox.checked && todo.deadline) {
+          const nextDay = new Date(todo.deadline);
+          nextDay.setDate(nextDay.getDate() + 1);
+          todos[index].deadline = nextDay.toISOString();
+          todos[index].done = false;
+        } else {
+          todos[index].done = checkbox.checked;
+        } else {
             todos[index].done = checkbox.checked;
           }
           saveTodos();
@@ -275,4 +279,3 @@
   </script>
 </body>
 </html>
-

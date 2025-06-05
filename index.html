@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-image: url('https://c8.alamy.com/compde/2bkmkxb/winzige-baby-katzchen-nahtloses-muster-liebenswert-kleine-katzen-hintergrund-einfache-kawaii-doodle-stil-2bkmkxb.jpg');
+      background-image: url('https://media.istockphoto.com/id/1487283582/de/foto/silber-getigerte-katze-lugt-hinter-einer-wei%C3%9Fen-wand-hervor.jpg?s=612x612&w=0&k=20&c=YOOiqQodz-Ffl71ZVz-VdY1hcZUmYSwFylh97eM5Z0A=');
       background-repeat: no-repeat;
       background-size: cover;
       background-attachment: fixed;
@@ -120,10 +120,11 @@
   </style>
 </head>
 <body>
-  <div style="background-color: rgba(255, 255, 255, 0.85); padding: 0.5rem 1rem; border-radius: 12px; max-width: 90%; margin: 1rem auto; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <h1>🐾 Tayfuns ToDos</h1>
-</div>
-  <label style="display: flex; align-items: center; gap: 0.5rem;"><input type="checkbox" id="enableDeadline" checked> Deadline setzen</label><input type="datetime-local" id="deadlineInput" placeholder="Deadline" title="Deadline" aria-label="Deadline">
+  <div class="todo">
+    <input type="text" id="taskInput" placeholder="Neue Aufgabe..." />
+    <label style="display: flex; align-items: center; gap: 0.5rem;"><input type="checkbox" id="enableDeadline" checked> Deadline setzen</label>
+    <input type="datetime-local" id="deadlineInput" placeholder="Deadline" />
     <select id="repeatInput">
       <option value="once">Einmalig</option>
       <option value="daily" selected>Täglich</option>
@@ -138,14 +139,14 @@
     const todoList = document.getElementById("todoList");
     const reminderBox = document.getElementById("reminderBox");
     let todos = JSON.parse(localStorage.getItem("todos") || "null") || [
-  {
-    text: "Wasser trinken",
-    done: false,
-    deadline: none,
-    reminded: false,
-    repeat: "daily"
-  }
-];
+      {
+        text: "Wasser trinken",
+        done: false,
+        deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+        reminded: false,
+        repeat: "daily"
+      }
+    ];
 
     function saveTodos() {
       localStorage.setItem("todos", JSON.stringify(todos));
@@ -168,13 +169,6 @@
             deadline.className = "overdue-text";
             li.classList.add("overdue");
             deadline.textContent = `Überfällig seit ${dueDate.toLocaleString()}`;
-            // deadline wird nur bei aktivierter Checkbox hinzugefügt
-            wrapper.appendChild(deadline);
-          } else if (dueDate >= now) {
-            deadline.textContent = `Fällig: ${dueDate.toLocaleString()}`;
-            wrapper.appendChild(deadline);
-          }
-        };
           } else {
             deadline.textContent = `Fällig: ${dueDate.toLocaleString()}`;
           }
@@ -210,7 +204,7 @@
         wrapper.style.display = "flex";
         wrapper.style.flexDirection = "column";
         wrapper.appendChild(content);
-        wrapper.appendChild(deadline);
+        if (todo.deadline) wrapper.appendChild(deadline);
 
         const actions = document.createElement("div");
         actions.className = "actions";
@@ -281,3 +275,4 @@
   </script>
 </body>
 </html>
+

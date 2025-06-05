@@ -31,7 +31,7 @@
       border-radius: 16px;
       box-shadow: 0 8px 16px rgba(0,0,0,0.2);
     }
-    input, button {
+    input, select, button {
       padding: 0.6rem;
       margin: 0.4rem 0;
       width: 100%;
@@ -39,6 +39,11 @@
       box-sizing: border-box;
       border-radius: 8px;
       border: 1px solid #ccc;
+    }
+    input[type="datetime-local"]:before {
+      content: attr(data-placeholder);
+      color: #999;
+      margin-right: 0.5rem;
     }
     button {
       background-color: #076412;
@@ -116,7 +121,11 @@
   <h1>🐾 Tayfuns ToDos</h1>
   <div class="todo">
     <input type="text" id="taskInput" placeholder="Neue Aufgabe..." />
-    <input type="datetime-local" id="deadlineInput" placeholder="Deadline" />
+    <input type="datetime-local" id="deadlineInput" data-placeholder="Deadline" />
+    <select id="repeatInput">
+      <option value="once">Einmalig</option>
+      <option value="daily">Täglich</option>
+    </select>
     <button onclick="addTask()">Hinzufügen</button>
     <ul id="todoList"></ul>
   </div>
@@ -139,7 +148,7 @@
         li.className = todo.done ? "done" : "";
 
         const content = document.createElement("span");
-        content.textContent = todo.text;
+        content.textContent = todo.text + (todo.repeat === "daily" ? " (Täglich)" : "");
 
         const deadline = document.createElement("small");
         deadline.textContent = todo.deadline ? `Fällig: ${new Date(todo.deadline).toLocaleString()}` : "";
@@ -148,7 +157,14 @@
         checkbox.type = "checkbox";
         checkbox.checked = todo.done;
         checkbox.addEventListener("change", () => {
-          todos[index].done = !todos[index].done;
+          if (todo.repeat === "daily" && checkbox.checked) {
+            const nextDay = new Date(todo.deadline);
+            nextDay.setDate(nextDay.getDate() + 1);
+            todos[index].deadline = nextDay.toISOString();
+            todos[index].done = false;
+          } else {
+            todos[index].done = checkbox.checked;
+          }
           saveTodos();
           renderTodos();
         });
@@ -183,13 +199,15 @@
 
     function addTask() {
       const text = document.getElementById("taskInput").value.trim();
-      const deadline = document.getElementById("deadlineInput").value;
+      const deadline = document.getElementById("deadlineInput").value || new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+      const repeat = document.getElementById("repeatInput").value;
       if (text) {
-        todos.push({ text, done: false, deadline, reminded: false });
+        todos.push({ text, done: false, deadline, reminded: false, repeat });
         saveTodos();
         renderTodos();
         document.getElementById("taskInput").value = "";
         document.getElementById("deadlineInput").value = "";
+        document.getElementById("repeatInput").value = "once";
       }
     }
 
@@ -211,7 +229,7 @@
     function checkReminders() {
       const now = new Date();
       let messages = [];
-      todos.forEach((todo, i) => {
+      todos.forEach((todo) => {
         if (!todo.done && todo.deadline) {
           const due = new Date(todo.deadline);
           const diff = due - now;
